@@ -1,0 +1,11 @@
+{{- if .Values.maxUnavailable }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: "{{ template "django-todo.fullname" . }}"
+spec:
+  maxUnavailable: {{ .Values.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "django-todo.selectorLabels" . | nindent 6 }}
+{{- end }}

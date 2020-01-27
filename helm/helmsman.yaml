@@ -1,0 +1,41 @@
+settings: {}
+
+namespaces:
+  demo:
+    protected: false
+
+helmRepos:
+  stable: https://kubernetes-charts.storage.googleapis.com
+
+apps:
+  postgresql:
+    enabled: true
+    protected: false
+    priority: -20
+    namespace: demo
+    chart: stable/postgresql
+    version: 8.1.5
+    valuesFile: postgres-values.yaml
+    wait: true
+    set:
+      postgresqlUsername: "$TODO_DB_USER"
+      postgresqlDatabase: "$TODO_DB_NAME"
+      postgresqlPassword: "$TODO_DB_PASSWORD"
+
+  django-todo:
+    enabled: true
+    protected: false
+    priority: -10
+    namespace: demo
+    chart: ./charts/django-todo
+    version: 0.0.1
+    valuesFile: django-todo-values.yaml
+    wait: true
+    test: true
+    set:
+      adminUser.login: "$TODO_ADMIN_LOGIN"
+      adminUser.email: "$TODO_ADMIN_EMAIL"
+      adminUser.password: "$TODO_ADMIN_PASSWORD"
+      database.username: "$TODO_DB_USER"
+      database.password: "$TODO_DB_PASSWORD"
+      database.dbName: "$TODO_DB_NAME"

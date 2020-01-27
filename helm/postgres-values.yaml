@@ -1,0 +1,19 @@
+## String to fully override postgresql.fullname template
+##
+fullnameOverride: postgres
+
+## PostgreSQL data Persistent Volume Storage Class
+##
+persistence:
+  enabled: false
+
+## Configure resource requests and limits
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources:
+  limits:
+    memory: 512Mi
+    cpu: 250m
+  requests:
+    memory: 256Mi
+    cpu: 125m

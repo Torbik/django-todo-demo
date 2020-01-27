@@ -1,0 +1,54 @@
+# Pre-install hook creating superuser or updating its password if the user already exists
+{{- if .Values.adminUser }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "django-todo.fullname" . }}-hook
+  labels:
+    {{- include "django-todo.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  template:
+    metadata:
+      name: {{ include "django-todo.fullname" . }}-hook
+      labels:
+        {{- include "django-todo.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pre-install-hook
+        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        env:
+          - name: DB_HOST
+            value: "{{ .Values.database.host }}"
+          - name: DB_USER
+            value: "{{ .Values.database.username }}"
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "django-todo.fullname" . }}-db
+                key: dbPassword
+          - name: DB_PORT
+            value: "{{ .Values.database.port }}"
+          - name: DB_NAME
+            value: "{{ .Values.database.dbName }}"
+        command:
+        - sh
+        - -c
+        - |
+          python manage.py migrate; \
+          echo '
+          from django.contrib.auth.models import User;
+          user = User.objects.filter(username="{{ .Values.adminUser.login }}", is_superuser=True)
+          if user.exists():
+              user[0].set_password("{{ .Values.adminUser.password }}")
+              print("{} superuser password updated".format("{{ .Values.adminUser.login }}"))
+          else:
+              User.objects.create_superuser("{{ .Values.adminUser.login }}",
+                                            "{{ .Values.adminUser.email }}",
+                                            "{{ .Values.adminUser.password }}")
+              print("{} superuser created".format("{{ .Values.adminUser.login }}"))
+          ' | python manage.py shell
+{{- end }}

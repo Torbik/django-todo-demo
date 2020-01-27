@@ -1,0 +1,5 @@
+# IntelliJ IDEA
+.idea/
+
+# Helm charts dependencies
+**/charts/*.tgz

@@ -1,0 +1,36 @@
+## django-todo admin user credentials (created once on chart install)
+#
+adminUser: {}
+
+## Postgres database connectivity parameters
+##
+database:
+  host: postgres
+  port: "5432"
+
+backend:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+nginx:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+service:
+  type: NodePort
+
+ingress:
+  enabled: true
+  hosts:
+    - host: django-todo-demo.local
+      paths: [ "/" ]

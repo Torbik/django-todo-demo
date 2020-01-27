@@ -1,0 +1,35 @@
+# Test trying to log in to django-todo app as admin user
+{{- if .Values.test.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "django-todo.fullname" . }}-test-login"
+  labels:
+{{ include "django-todo.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test-success
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  containers:
+    - name: {{ .Chart.Name }}-test
+      image: "{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+      imagePullPolicy: {{ .Values.test.image.pullPolicy }}
+      securityContext:
+        {{- toYaml .Values.test.containerSecurityContext | nindent 8 }}
+      command:
+        - python3
+        - /tests/test.py
+      env:
+        - name: TODO_ADMIN_USER
+          value: "{{ .Values.adminUser.login }}"
+        - name: TODO_ADMIN_PASSWORD
+          value: "{{ .Values.adminUser.password }}"
+      volumeMounts:
+        - name: tests
+          mountPath: /tests
+  volumes:
+    - name: tests
+      configMap:
+        name: {{ include "django-todo.fullname" . }}-test-login
+  restartPolicy: Never
+{{- end }}
